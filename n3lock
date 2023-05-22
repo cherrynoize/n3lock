@@ -209,7 +209,17 @@ lockscreen () {
   --line-uses-inside --radius "$circle_radius" --ring-width "$circle_width" --indicator \
   --verif-text="$verif_text" --wrong-text="$wrong_text" --noinput-text="$noinput_text" \
   --clock --date-font="$date_font" --time-font="$time_font" --layout-font="$layout_font" \
-  --verif-font="$verif_font" --wrong-font="$wrong_font" --greeter-font="$greeter_font" &
+  --verif-font="$verif_font" --wrong-font="$wrong_font" --greeter-font="$greeter_font" \
+  "$custom_cmd" "$cmd_1_option" "$cmd_1" \
+  "$cmd_2_option" "$cmd_2" \
+  "$cmd_3_option" "$cmd_3" \
+  "$cmd_4_option" "$cmd_4" \
+  "$cmd_5_option" "$cmd_5" \
+  "$cmd_6_option" "$cmd_6" \
+  "$cmd_7_option" "$cmd_7" \
+  "$cmd_8_option" "$cmd_8" \
+  "$cmd_9_option" "$cmd_9" \
+  $args &
 }
 
 # run exit actions
