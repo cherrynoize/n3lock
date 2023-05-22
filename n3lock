@@ -92,9 +92,6 @@ layout_mode="-1" # 0,1,2 (-1 to hide)
 layout_color="$fg_color"
 layout_font="$main_font"
 
-# set to 1 to enable slowfade, 0 to disable
-use_slowfade="0"
-
 # cache
 resize_img="${cachepath}/resize.png"
 resize_blur_img="${cachepath}/resize_blur.png"
@@ -170,28 +167,7 @@ genbg () {
   echo "Finished caching image"
 }
 
-slowfade () {
-  if [[ "$use_slowfade" = "1" ]]; then
-    dis=$(echo -n "$DISPLAY" | tr -c '[:alnum:]' _)
-    ifc='com.github.chjj.compton'
-    obj='/com/github/chjj/compton'
-    if [[ "$1" == "start" ]]; then
-      dbus-send --print-reply --dest="${ifc}.${dis}" \
-          "$obj" "$ifc.opts_set" string:fade_in_step double:0.02
-      dbus-send --print-reply --dest="${ifc}.${dis}" \
-          "$obj" "$ifc.opts_set" string:fade_out_step double:0.02
-    elif [[ "$1" == "end" ]]; then
-      sleep 1
-      dbus-send --print-reply --dest="${ifc}.${dis}" \
-          "$obj" "$ifc.opts_set" string:fade_in_step double:0.1
-      dbus-send --print-reply --dest="${ifc}.${dis}" \
-          "$obj" "$ifc.opts_set" string:fade_out_step double:0.1
-    fi
-  fi
-}
-
 lockscreen () {
-  slowfade start
   greet="$(eval "$greeter_cmd")"
 
   i3lock -n --force-clock -i "${resize_pic_sc_blur_img}" \
@@ -208,8 +184,6 @@ lockscreen () {
   --verif-text="$verif_text" --wrong-text="$wrong_text" --noinput-text="$noinput_text" \
   --clock --date-font="$date_font" --time-font="$time_font" --layout-font="$layout_font" \
   --verif-font="$verif_font" --wrong-font="$wrong_font" --greeter-font="$greeter_font"
-
-  slowfade end
 }
 
 show_help () {
