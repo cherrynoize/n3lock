@@ -15,7 +15,6 @@
 1. Install the required dependencies
 2. Clone and install
 
-    aa
     git clone https://github.com/cherrynoize/n3lock
     cd n3lock
     sudo make install
