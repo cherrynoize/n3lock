@@ -35,7 +35,7 @@ First cache images with
 n3lock -i PATH/TO/YOUR/IMAGE
 ```
 
-From now on you can run `n3lock` like so
+From now on you can run `n3lock` with your cached images like so
 
 ```
 n3lock [-c CONFIG]
