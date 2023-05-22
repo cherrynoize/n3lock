@@ -1,9 +1,11 @@
 #!/bin/env bash
 
-# images
-wallpaper="$2"
+# default locations
+configdir="${HOME}/.config/n3lock"
+configfile="${configdir}/config.sh"
 cachepath="${HOME}/.cache/n3lock"
-pfp_crop="${cachepath}/${USER}_pfp_crop.png"
+pfppath="${HOME}/.pfp"
+wallpath="${HOME}/.wallpaper"
 
 # sizes
 pfp_size="300"
@@ -41,10 +43,6 @@ out_offset_v="0-32+${offset_v}"
 # don't ask why but shift/5 aligns it with container
 ins_offset_h="0+${offset_h}+$((shift_x/5))"
 ins_offset_v="0+${offset_v}+$((shift_y/5))"
-
-# stackclock pfp offset
-sc_ins_offset_h="$ins_offset_h"
-sc_ins_offset_v="$ins_offset_v"
 
 # keyboard layout indicator
 layout_pad_x="50" # pad from horizontal screen edge
@@ -93,25 +91,36 @@ layout_color="$fg_color"
 layout_font="$main_font"
 
 # cache
-resize_img="${cachepath}/resize.png"
-resize_blur_img="${cachepath}/resize_blur.png"
-resize_pic_blur_img="${cachepath}/resize_pic_blur.png"
-resize_pic_sc_blur_img="${cachepath}/resize_pic_sc_blur.png"
+pfp_crop="${cachepath}/pfp.png"
+wallpaper_img="${cachepath}/wallpaper.png"
+wallpaper_blur_img="${cachepath}/wallpaper_blur.png"
+wallpaper_pfp_blur_img="${cachepath}/wallpaper_pfp_blur.png"
 
+# init wallpaper
+wallpaper="$2"
+
+# source config
+[ -f "$configfile" ] && . "$configfile"
+
+# crop pfp
 cropuser () {
   echo "Cropping user image ..."
 
-  pfp_home="${HOME}/.pfp"
+  pfp_home="$pfppath"
   pfp_var="/var/lib/AccountsService/icons/${USER}"
 	if [[ -d "$1" ]]; then
 		pfp_home="$1"
 	fi
 
-  if [[ -e "$pfp_home" ]]; then
+  if [[ -f "$1" ]]; then
+    userpic="$1"
+  elif [[ -e "$pfp_home" ]]; then
     userpic="$pfp_home/*"
   	if [[ -f "$pfp_home" ]]; then
     	userpic="$pfp_home"
   	fi
+  elif [[ -d "${configdir}/pfp" ]]; then
+    userpic="${configdir}/pfp/*"
   elif [[ -e "$pfp_var" ]]; then
     userpic="$pfp_var"
   fi
@@ -128,27 +137,30 @@ cropuser () {
   fi
 }
 
+# crop wallpaper
 cropbg () {
   echo "Cropping background ..."
 
-  if [[ -n "${wallpaper}" ]] && [[ -n "${resize_img}" ]]; then
+  if [[ -n "${wallpaper}" ]] && [[ -n "${wallpaper_img}" ]]; then
     convert "$wallpaper" -resize "${width}x" -gravity center -crop "${width}x${height}+0+0" +repage \( \
           -size 120x140 xc:none \
-          \) -gravity south -compose over -composite "${resize_img}"
+          \) -gravity south -compose over -composite "${wallpaper_img}"
   fi
 }
 
+# blur wallpaper
 blurbg () {
   echo "Blurring background ..."
 
-  if [[ -f "${resize_img}" ]] && [[ -n "${resize_blur_img}" ]]; then
-    convert "${resize_img}" \
+  if [[ -f "${wallpaper_img}" ]] && [[ -n "${wallpaper_blur_img}" ]]; then
+    convert "${wallpaper_img}" \
       -filter Gaussian \
       -blur 0x8 \
-      "${resize_blur_img}"
+      "${wallpaper_blur_img}"
   fi
 }
 
+# generate cached wallpaper
 genbg () {
   echo "Caching background ..."
 
@@ -156,21 +168,35 @@ genbg () {
     mkdir "${HOME}/.cache/n3lock"
   fi
 
+  if [ ! -f "$1" ] && [ -d "$wallpath" ]; then
+    wallpaper="${wallpath}/*"
+  elif [[ -d "${configdir}/wallpaper" ]]; then
+    userpic="${configdir}/wallpaper/*"
+  fi
+
   cropbg
   blurbg
 
-  if [[ -f "${pfp_crop}" ]] && [[ -f "${resize_blur_img}" ]] && [[ -n "${resize_pic_sc_blur_img}" ]]; then
-    composite -geometry "+$(((half_width)+(ins_offset_h)))+$(((half_height)-80+(ins_offset_v)))" "${pfp_crop}" "${resize_blur_img}" "${resize_pic_blur_img}"
-    composite -geometry "+$(((half_width)+(sc_ins_offset_h)))+$(((half_height)+(sc_ins_offset_v)))" "${pfp_crop}" "${resize_blur_img}" "${resize_pic_sc_blur_img}"
+  if [[ -f "${pfp_crop}" ]] && [[ -f "${wallpaper_blur_img}" ]]; then
+    composite -geometry "+$(((half_width)+(ins_offset_h)))+$(((half_height)+(ins_offset_v)))" "${pfp_crop}" "${wallpaper_blur_img}" "${wallpaper_pfp_blur_img}"
   fi
 
   echo "Finished caching image"
 }
 
+# lock screen
 lockscreen () {
+  # check if cache exists
+  [ -f "${wallpaper_img}" ] &&
+    image_cmd="${wallpaper_img}"
+  [ -f "${wallpaper_pfp_blur_img}" ] &&
+    image_cmd="${wallpaper_pfp_blur_img}"
+  [ -n "$image_cmd" ] &&
+    image_param="-i"
+  # set greeting msg
   greet="$(eval "$greeter_cmd")"
 
-  i3lock -n --force-clock -i "${resize_pic_sc_blur_img}" \
+  i3lock -n --force-clock "$image_param" "$image_cmd" \
   --ind-pos="$ind_pos" --time-pos="$time_pos" --date-pos="$date_pos" --greeter-pos="$greeter_pos" --layout-pos="$layout_pos" \
   --insidever-color="$verif_color" --insidewrong-color="$wrong_color" --inside-color="$inside_color" \
   --ringver-color="$verif_color" --ringwrong-color="$wrong_color" --ring-color="$fg_color" \
@@ -183,9 +209,22 @@ lockscreen () {
   --line-uses-inside --radius "$circle_radius" --ring-width "$circle_width" --indicator \
   --verif-text="$verif_text" --wrong-text="$wrong_text" --noinput-text="$noinput_text" \
   --clock --date-font="$date_font" --time-font="$time_font" --layout-font="$layout_font" \
-  --verif-font="$verif_font" --wrong-font="$wrong_font" --greeter-font="$greeter_font"
+  --verif-font="$verif_font" --wrong-font="$wrong_font" --greeter-font="$greeter_font" &
 }
 
+# run exit actions
+quit () {
+  case $2 in
+    -*)
+      shift 1 || exit 1 ;;
+    *)
+      shift 2 || exit 1 ;;
+  esac
+
+  exec "$0" "$@"
+}
+
+# show usage
 show_help () {
   cat << EOF
 USAGE
@@ -195,20 +234,30 @@ DESCRIPTION
   n3lock with no option shows lockscreen with default configuration.
 
 CONFIGURATION
-  Default config file is located at \${HOME}/.config/n3lock/config.sh. You can specify a custom config with -c|--config path/to/config.
+  Default config dir value is ${configdir}.
+
+  Default config file is located at ${configdir}/config.sh. You can specify a custom config with -c|--config path/to/config.
+
+  With -p and -w IMAGE can be omitted and n3lock will look for the first file in ${HOME}/.pfp or ${configdir}/pfp and ${HOME}/.wallpaper or ${configdir}/wallpaper respectively and in this order. The default directory for each can be overridden by setting \`pfppath\` and \`wallpath\` variables respectively in the config file.
 
 OPTIONS
-  -i|--image             Generate cache images
-  -c|--config CONFIG     Use CONFIG config file
+  Mandatory arguments to long options are mandatory for short options as well.
+
+  -p|--pfp [IMAGE]       Generate pfp image cache
+  -w|--wallpaper [IMAGE] Generate wallpaper cache
+  -c|--config CONFIG     Use config file CONFIG
   -h|--help              Show this help message
 EOF
 }
 
+# parse args
 case $1 in
-  -i|--image)
+  -p|--pfp)
     cropuser "$2"
+    quit "$@" ;;
+  -w|--wallpaper)
     genbg "$2"
-    exit ;;
+    quit "$@" ;;
   -h|--help)
     show_help
     exit ;;
@@ -219,4 +268,5 @@ case $1 in
     exit 1 ;;
 esac
 
+# run lock screen
 lockscreen

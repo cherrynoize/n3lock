@@ -32,13 +32,19 @@ sudo make uninstall
 First cache images with
 
 ```
-n3lock -i PATH/TO/YOUR/IMAGE
+n3lock -p [PATH/TO/PFP] -w [PATH/TO/WALLPAPER]
 ```
 
 From now on you can run `n3lock` with your cached images like so
 
 ```
 n3lock [-c CONFIG]
+```
+
+See usage for more details
+
+```
+n3lock --help
 ```
 
 ## Preview
