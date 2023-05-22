@@ -1,0 +1,316 @@
+#!/bin/env bash
+
+# images
+wallpaper="$2"
+cachepath="${HOME}/.cache/n3lock"
+pfp_crop="${cachepath}/${USER}_pfp_crop.png"
+
+# user
+fullname="$(getent passwd "$USER" | cut -d ":" -f 5 | cut -d "," -f 1)"
+full_alias="${fullname} (${USER})"
+if [[ -n "$fullname" ]]; then
+  full_alias="${fullname} (${USER})"
+else
+  full_alias="$USER"
+fi
+
+# sizes
+pfp_size="300"
+half_pfp_size="$((pfp_size/2))"
+img_size="${pfp_size}x${pfp_size}"
+circle_width="2"
+circle_radius="$((half_pfp_size-pfp_size/15))"
+time_size="70"
+date_size="70"
+greeter_size="25"
+layout_size="25"
+pfp_outer_size="${half_pfp_size} ${half_pfp_size}"
+pfp_border_radius="$half_pfp_size"
+pfp_padding="0"
+
+# screen
+width="$(xrandr --query | grep ' connected' | grep -o '[0-9][0-9]*x[0-9][0-9]*[^ ]*' | sed -r 's/^[^0-9]*([0-9]+x[0-9]+).*$/\1/' |cut -d "x" -f 1 |head -n1)"
+height="$(xrandr --query | grep ' connected' | grep -o '[0-9][0-9]*x[0-9][0-9]*[^ ]*' | sed -r 's/^[^0-9]*([0-9]+x[0-9]+).*$/\1/' |cut -d "x" -f 2 |head -n1)"
+half_width="$(((width-pfp_size)/2))"
+half_height="$(((height-pfp_size)/2))"
+
+# general body position shift
+shift_x="0"
+shift_y="30"
+
+# pfp container and image offset
+offset_h="0+${shift_x}"
+offset_v="200+${shift_y}"
+
+# container offset
+out_offset_h="0+${offset_h}"
+out_offset_v="0-32+${offset_v}"
+
+# inside image offset
+# don't know why but the shift/5 aligns it with container
+ins_offset_h="0+${offset_h}+$((shift_x/5))"
+ins_offset_v="0+${offset_v}+$((shift_y/5))"
+
+# stackclock pfp offset
+sc_ins_offset_h="$ins_offset_h"
+sc_ins_offset_v="$ins_offset_v"
+
+# keyboard layout indicator
+layout_pad_x="50" # pad from horizontal screen edge
+layout_pad_y="25" # pad from vertical screen edge
+
+# positions
+ind_pos="w/2+${out_offset_h}:h/2+${out_offset_v}"
+time_pos="w/2+${shift_x}:h/2-100+${shift_y}"
+date_pos="w/2+${shift_x}:h/2-30+${shift_y}"
+greeter_pos="w/2+${shift_x}:h/2+${shift_y}"
+layout_pos="w-${layout_pad_x}:${layout_pad_y}"
+
+# colors
+fg_color="999999ff"
+wrong_color="aaaaaa66"
+highlight_color="00000055"
+verif_color="aaaaaa66"
+inside_color="fefefe00"
+separator_color="00000000"
+
+# fonts
+main_font="Abel"
+msg_font="Lato"
+
+# text
+verif_text=""
+wrong_text=""
+noinput_text=""
+greeter_cmd="date +'%b, %d'"
+greeter_color="$fg_color"
+verif_font="$msg_font"
+wrong_font="$msg_font"
+greeter_font="$msg_font"
+
+# date and time
+time_fmt="%H"
+date_fmt="%M"
+time_color="$fg_color"
+date_color="$fg_color"
+time_font="$main_font"
+date_font="$main_font"
+
+# keyboard layout
+layout_mode="-1" # 0,1,2 (-1 to hide)
+layout_color="$fg_color"
+layout_font="$main_font"
+
+# set to 1 to enable slowfade, 0 to disable
+use_slowfade="0"
+
+# cache
+resize_img="${cachepath}/resize.png"
+resize_blur_img="${cachepath}/resize_blur.png"
+resize_pic_blur_img="${cachepath}/resize_pic_blur.png"
+resize_pic_sc_blur_img="${cachepath}/resize_pic_sc_blur.png"
+
+cropuser () {
+  echo "Cropping user image ..."
+
+  pfp_home="${HOME}/.pfp"
+  pfp_var="/var/lib/AccountsService/icons/${USER}"
+	if [[ -d "$1" ]]; then
+		pfp_home="$1"
+	fi
+
+  if [[ -e "$pfp_home" ]]; then
+    userpic="$pfp_home/*"
+  	if [[ -f "$pfp_home" ]]; then
+    	userpic="$pfp_home"
+  	fi
+  elif [[ -e "$pfp_var" ]]; then
+    userpic="$pfp_var"
+  fi
+
+	if [[ -n "$userpic" ]]; then
+  	convert "$userpic" -resize "$img_size" -gravity Center \( \
+    	-size "$img_size" xc:Black \
+    	-fill White \
+    	-draw "circle $pfp_outer_size $pfp_border_radius $pfp_padding" \
+    	-alpha Copy \
+    	\) -compose CopyOpacity -composite -trim "$pfp_crop"
+  else
+  	echo "No pfp found"
+  fi
+}
+
+cropbg () {
+  echo "Cropping background ..."
+
+  if [[ -n "${wallpaper}" ]] && [[ -n "${resize_img}" ]]; then
+    convert "$wallpaper" -resize "${width}x" -gravity center -crop "${width}x${height}+0+0" +repage \( \
+          -size 120x140 xc:none \
+          \) -gravity south -compose over -composite "${resize_img}"
+  fi
+}
+
+blurbg () {
+  echo "Blurring background ..."
+
+  if [[ -f "${resize_img}" ]] && [[ -n "${resize_blur_img}" ]]; then
+    convert "${resize_img}" \
+      -filter Gaussian \
+      -blur 0x8 \
+      "${resize_blur_img}"
+  fi
+}
+
+genbg () {
+  echo "Caching background ..."
+
+  if [[ ! -d "${HOME}/.cache/n3lock" ]]; then
+    mkdir "${HOME}/.cache/n3lock"
+  fi
+
+  cropbg
+  blurbg
+
+  if [[ -f "${pfp_crop}" ]] && [[ -f "${resize_blur_img}" ]] && [[ -n "${resize_pic_sc_blur_img}" ]]; then
+    composite -geometry "+$(((half_width)+(ins_offset_h)))+$(((half_height)-80+(ins_offset_v)))" "${pfp_crop}" "${resize_blur_img}" "${resize_pic_blur_img}"
+    composite -geometry "+$(((half_width)+(sc_ins_offset_h)))+$(((half_height)+(sc_ins_offset_v)))" "${pfp_crop}" "${resize_blur_img}" "${resize_pic_sc_blur_img}"
+  fi
+
+  echo "Finished caching image"
+}
+
+slowfade () {
+  if [[ "$use_slowfade" = "1" ]]; then
+    dis=$(echo -n "$DISPLAY" | tr -c '[:alnum:]' _)
+    ifc='com.github.chjj.compton'
+    obj='/com/github/chjj/compton'
+    if [[ "$1" == "start" ]]; then
+      dbus-send --print-reply --dest="${ifc}.${dis}" \
+          "$obj" "$ifc.opts_set" string:fade_in_step double:0.02
+      dbus-send --print-reply --dest="${ifc}.${dis}" \
+          "$obj" "$ifc.opts_set" string:fade_out_step double:0.02
+    elif [[ "$1" == "end" ]]; then
+      sleep 1
+      dbus-send --print-reply --dest="${ifc}.${dis}" \
+          "$obj" "$ifc.opts_set" string:fade_in_step double:0.1
+      dbus-send --print-reply --dest="${ifc}.${dis}" \
+          "$obj" "$ifc.opts_set" string:fade_out_step double:0.1
+    fi
+  fi
+}
+
+defaultclock () {
+  slowfade start
+
+  i3lock -n --force-clock -i "${resize_pic_blur_img}" \
+    --ind-pos="w/2:h/2+60" --time-pos="w-100:h-70" --date-pos="w-115:h-40" --greeter-pos="w/2:h/2" \
+    --insidever-color="$fg_color" --insidewrong-color="$wrong_color" --inside-color=fefefe00 \
+    --ringver-color="$verif_color" --ringwrong-color="$wrong_color" --ring-color="$fg_color" \
+    --keyhl-color="$highlight_color" --bshl-color="$highlight_color" --separator-color=00000000 \
+    --date-color="$fg_color" --time-color="$fg_color" --greeter-color="$fg_color" \
+    --time-str="%H:%M" --time-size=50 \
+    --date-str="%a, %b %d" --date-size=30 \
+    --greeter-text="$full_alias" --greeter-size=25\
+    --line-uses-ring \
+    --radius 38 --ring-width 3 --indicator \
+    --verif-text="" --wrong-text="" --noinput-text="" \
+    --clock --date-font="SF Pro Display" --time-font="SF Pro Display"
+
+  slowfade end
+}
+
+stackclock () {
+  slowfade start
+  date_now="$(date +'%b, %d')"
+
+  i3lock -n --force-clock -i "${resize_pic_sc_blur_img}" \
+  --ind-pos="w/2:h/2+60" --time-pos="w/2:h/2-100" --date-pos="w/2:h/2-30" --greeter-pos="w/2:h/2" \
+  --insidever-color="$verif_color" --insidewrong-color="$wrong_color" --inside-color=fefefe00 \
+  --ringver-color="$verif_color" --ringwrong-color="$wrong_color" --ring-color="$fg_color" \
+  --keyhl-color="$highlight_color" --bshl-color="$highlight_color" --separator-color=00000000 \
+  --date-color="$fg_color" --time-color="$fg_color" --greeter-color="$fg_color" \
+  --time-str="%H" --time-size=70 \
+  --date-str="%M" --date-size=70 \
+  --greeter-text="$date_now" --greeter-size=25 \
+  --line-uses-inside --radius 50 --ring-width 2 --indicator \
+  --verif-text="" --wrong-text="" --noinput-text="" \
+  --clock --date-font="Abel" --time-font="Abel"
+
+  slowfade end
+}
+
+circleclock () {
+  slowfade start
+
+  i3lock -n --force-clock -i "${resize_blur_img}" \
+  --ind-pos="w/2:h/2" --time-pos="w/2:h/2-5" --date-pos="w/2:h/2+35" --greeter-pos="w/2:h/2" \
+  --insidever-color=5f5f5f66 --insidewrong-color="$wrong_color" --inside-color=5f5f5f66 \
+  --ringver-color="$verif_color" --ringwrong-color="$wrong_color" --ring-color="$fg_color" \
+  --keyhl-color="$highlight_color" --bshl-color="$highlight_color" --separator-color=00000000 \
+  --date-color="$fg_color" --time-color="$fg_color" --greeter-color="$fg_color" \
+  --time-str="%H | %M" --time-size=40 \
+  --date-str="%a, %d %b" --date-size=25 \
+  --greeter-text="$date_now" --greeter-size=25 \
+  --line-uses-inside --radius 75 --ring-width 2 --indicator \
+  --verif-text="" --wrong-text="" --noinput-text="" \
+  --clock --date-font="Abel" --time-font="Abel"
+
+  slowfade end
+}
+
+customclock () {
+  slowfade start
+  greet="$(eval "$greeter_cmd")"
+
+  i3lock -n --force-clock -i "${resize_pic_sc_blur_img}" \
+  --ind-pos="$ind_pos" --time-pos="$time_pos" --date-pos="$date_pos" --greeter-pos="$greeter_pos" --layout-pos="$layout_pos" \
+  --insidever-color="$verif_color" --insidewrong-color="$wrong_color" --inside-color="$inside_color" \
+  --ringver-color="$verif_color" --ringwrong-color="$wrong_color" --ring-color="$fg_color" \
+  --keyhl-color="$highlight_color" --bshl-color="$highlight_color" --separator-color="$separator_color" \
+  --date-color="$date_color" --time-color="$time_color" --greeter-color="$greeter_color" --layout-color="$layout_color" \
+  --time-str="$time_fmt" --time-size="$time_size" \
+  --date-str="$date_fmt" --date-size="$date_size" \
+  --greeter-text="$greet" --greeter-size="$greeter_size" \
+  --keylayout "$layout_mode" --layout-size="$layout_size" \
+  --line-uses-inside --radius "$circle_radius" --ring-width "$circle_width" --indicator \
+  --verif-text="$verif_text" --wrong-text="$wrong_text" --noinput-text="$noinput_text" \
+  --clock --date-font="$date_font" --time-font="$time_font" --layout-font="$layout_font" \
+  --verif-font="$verif_font" --wrong-font="$wrong_font" --greeter-font="$greeter_font"
+
+  slowfade end
+}
+
+show_help () {
+  cat << EOF
+Usage :
+ n3lock [OPTION]
+
+If no option is passed shows lockscreen with custom configuration.
+
+Available options:
+ -i, --image             Generate cache images
+ -sc, --stackclock       Show lockscreen with stacked digital clock preset
+ -cc, --circleclock      Show lockscreen with clock inside circle preset
+ -dc, --defaultclock     Show default lockscreen preset
+ -h, --help              Show this help message
+EOF
+}
+
+case $1 in
+  -i|--image)
+    cropuser "$2"
+    genbg "$2" ;;
+  -h|--help)
+    show_help ;;
+  -sc|--stackclock)
+    stackclock ;;
+  -cc|--circleclock)
+    circleclock ;;
+  -dc|--defaultclock)
+    defaultclock ;;
+  -*)
+    echo "Unknown option: $1" ;
+    exit 1 ;;
+  *)
+    customclock ;;
+esac
