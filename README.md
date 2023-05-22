@@ -23,17 +23,23 @@ sudo make install
 
 To uninstall simply run
 
-    sudo make uninstall
+```
+sudo make uninstall
+```
 
 ## Usage
 
 First cache images with
 
-    n3lock -i PATH/TO/YOUR/IMAGE
+```
+n3lock -i PATH/TO/YOUR/IMAGE
+```
 
 From now on you can run `n3lock` like so
 
-    n3lock [-c CONFIG]
+```
+n3lock [-c CONFIG]
+```
 
 ## Preview
 
