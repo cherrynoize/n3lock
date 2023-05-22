@@ -45,8 +45,9 @@ From now on you can run `n3lock` like so
 ## Contribute
 
 You can help the project by just running it as your lockscreen and
-complaining about any misbehaviour or issue. Please consider
-opening a pull request if you know how to improve some feature or
-how to fix a bug you found.
+complaining about any misbehaviour or issue.
 
-[![Buy me a coke](https://cherrynoize.github.io/contribute)
+### Please consider opening a pull request if you know how to improve
+### some feature or how to fix a bug you found.
+
+[Buy me a coke](https://cherrynoize.github.io/contribute)
