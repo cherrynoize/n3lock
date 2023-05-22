@@ -14,7 +14,6 @@
 
 1. Install the required dependencies
 2. Clone and install
-.
 
     git clone https://github.com/cherrynoize/n3lock
     cd n3lock
