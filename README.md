@@ -31,7 +31,7 @@ First cache images with
 
 From now on you can run `n3lock` like so
 
-		n3lock [-c CONFIG]
+    n3lock [-c CONFIG]
 
 ## Preview
 
@@ -40,7 +40,7 @@ From now on you can run `n3lock` like so
 ## Credits
 
 - based on [i3lock](https://github.com/i3/i3lock)
-- inspired by [n3lock](https://github.com/reorr/n3lock)
+- inspired by [mantablockscreen](https://github.com/reorr/mantablockscreen)
 
 ## Contribute
 
