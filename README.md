@@ -44,11 +44,13 @@ From now on you can run `n3lock` like so
 
 ## Contribute
 
-[Buy me a coke](https://cherrynoize.github.io/contribute)
+### [Buy me a coke](https://cherrynoize.github.io/contribute)
+
+### Testing
 
 You can help the project by just setting it as your lockscreen and
 complaining about any issue or misbehaviour.
 
 #### Please consider opening a pull request if you know how to improve some feature or how to fix a bug you found.
 
-### Thanks for using n3lock
+## Thanks for using n3lock
