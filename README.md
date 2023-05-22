@@ -13,7 +13,7 @@
 ## Installation
 
 1. Install the required dependencies
-2. Clone and install
+2. Clone this repo and run make install
 
 ```
 git clone https://github.com/cherrynoize/n3lock
