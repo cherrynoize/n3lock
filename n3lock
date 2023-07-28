@@ -219,17 +219,21 @@ lockscreen () {
   "$cmd_7_option" "$cmd_7" \
   "$cmd_8_option" "$cmd_8" \
   "$cmd_9_option" "$cmd_9" \
-  $args &
+  $args
 }
 
 # run exit actions
 quit () {
   case $2 in
     -*)
-      shift 1 || exit 1 ;;
+      shift 1 || exit 1;;
     *)
-      shift 2 || exit 1 ;;
+      shift 2 || exit 1;;
   esac
+
+  if [ -z "$1" ]; then
+    exit
+  fi
 
   exec "$0" "$@"
 }
