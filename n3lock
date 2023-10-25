@@ -196,7 +196,7 @@ lockscreen () {
   # set greeting msg
   greet="$(eval "$greeter_cmd")"
 
-  i3lock -n --force-clock "$image_param" "$image_cmd" \
+  i3lock -e -n --force-clock "$image_param" "$image_cmd" \
   --ind-pos="$ind_pos" --time-pos="$time_pos" --date-pos="$date_pos" --greeter-pos="$greeter_pos" --layout-pos="$layout_pos" \
   --insidever-color="$verif_color" --insidewrong-color="$wrong_color" --inside-color="$inside_color" \
   --ringver-color="$verif_color" --ringwrong-color="$wrong_color" --ring-color="$fg_color" \

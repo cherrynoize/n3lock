@@ -13,7 +13,13 @@
 ## Installation
 
 1. Install the required dependencies
-2. Clone this repo and run make install
+
+*Arch*
+```
+yay -S bash imagemagick i3lock-color
+```
+
+2. Clone this repo and run `make install`
 
 ```
 git clone https://github.com/cherrynoize/n3lock
@@ -104,12 +110,12 @@ n3lock --help
 - display battery information
 - display proper keyboard input modes
 - add additional greeting messages
-- add powerdown menu
+- add powermenu
 
 ### Testing
 
-You can help the project by just setting it as your lockscreen and
-complaining about any issue or misbehaviour.
+You can help the project by simply using it as your lockscreen and
+signaling any issue or misbehaviour.
 
 Please consider opening a pull request if you know how to improve some feature or how to fix a bug you found.
 
