@@ -35,44 +35,22 @@ sudo make uninstall
 
 ## Configuration
 
-Default config file is in $HOME/.config/n3lock/config.sh. It's not
-there by default, you need to create it.
+`n3lock` looks for a config file at
+`$HOME/.config/n3lock/config.sh`. It's not there by default, you
+need to create it.
+
+```
+cp config.sh.example "$HOME/.config/n3lock/config.sh"
+```
 
 You can pretty much override any variable defined at the top of
-the n3lock script since this file is sourced after initialization.
+`n3lock` since this file is sourced after initialization.
 
-Since it's sourced from a bash script, any bash code is also okay.
-So you can, for instance, source other config modules like so:
-
-```
-. relative/path/to/config.sh
-```
-
-This is an example config file that showcases the `custom_cmd` variable.
-The reasoning behind it was I didn't want just a single variable
-where I have to play it smart with all the nested quoting and so
-every variable is passed as a separate argument to the locker
-utility.
+You could, for instance, source other config modules like so:
 
 ```
-custom_cmd="--custom-key-commands"
-cmd_1_option="--cmd-brightness-up"
-cmd_1="set-light -ur 7"
-cmd_2_option="--cmd-brightness-down"
-cmd_2="set-light -dr 7"
-cmd_3_option="--cmd-audio-mute"
-cmd_3="amixer sset Master togglemute"
-cmd_4_option="--cmd-volume-up"
-cmd_4="amixer sset Master 5%+"
-cmd_5_option="--cmd-volume-down"
-cmd_5="amixer sset Master 5%-"
+. path/to/config.sh
 ```
-
-In this example we pass handling of volume and brightness keys
-to specific distinct commands.
-
-`set-light` is a custom backlight manager script. You can get it
-[here](https://github.com/cherrynoize/set-light).
 
 ## Usage
 
