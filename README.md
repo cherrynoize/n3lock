@@ -74,7 +74,7 @@ n3lock --help
 
 ## Preview
 
-![preview](preview/screenshot.png)
+![preview](screenshot.png)
 
 ## Credits
 
