@@ -4,6 +4,8 @@
   <img src="preview/preview.gif" />
 </div>
 
+![preview](screenshot.png)
+
 ## Dependencies
 
 - `bash`
@@ -71,10 +73,6 @@ See usage for more details
 ```
 n3lock --help
 ```
-
-## Preview
-
-![preview](screenshot.png)
 
 ## Credits
 
