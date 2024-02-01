@@ -8,15 +8,14 @@
 
 ## Dependencies
 
-- `bash`
-- `imagemagick`
-- `i3lock-color`
+```
+bash imagemagick i3lock-color
+```
 
 ## Installation
 
 1. Install the required dependencies
 
-*Arch*
 ```
 yay -S bash imagemagick i3lock-color
 ```
