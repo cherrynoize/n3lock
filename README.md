@@ -25,13 +25,13 @@ yay -S bash imagemagick i3lock-color
 ```
 git clone https://github.com/cherrynoize/n3lock
 cd n3lock
-sudo make install
+make install
 ```
 
 To uninstall simply run
 
 ```
-sudo make uninstall
+make uninstall
 ```
 
 ## Configuration
