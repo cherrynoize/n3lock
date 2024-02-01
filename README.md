@@ -92,11 +92,9 @@ n3lock --help
 
 ### Testing
 
-You can help the project by simply using it as your lockscreen and
-signaling any issue or misbehaviour.
+You can help the project by just using it and
+submitting any issue or misbehaviour.
 
 Please consider opening a pull request if you know how to improve some feature or how to fix a bug you found.
-
-### [Buy me a coke](https://cherrynoize.github.io/contribute)
 
 ### Thanks for using n3lock
