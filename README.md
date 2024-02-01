@@ -94,4 +94,4 @@ submitting any issue or misbehaviour.
 
 Please consider opening a pull request if you know how to improve some feature or how to fix a bug you found.
 
-### Thanks for using n3lock! 💙
+### Thanks for using n3lock 💙
