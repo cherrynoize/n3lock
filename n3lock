@@ -126,7 +126,7 @@ cropuser () {
   fi
 
 	if [[ -n "$userpic" ]]; then
-  	convert "$userpic" -resize "$img_size" -gravity Center \( \
+  	magick "$userpic" -resize "$img_size" -gravity Center \( \
     	-size "$img_size" xc:Black \
     	-fill White \
     	-draw "circle $pfp_outer_size $pfp_border_radius $pfp_padding" \
@@ -141,8 +141,8 @@ cropuser () {
 cropbg () {
   echo "Cropping background ..."
 
-  if [[ -n "${wallpaper}" ]] && [[ -n "${wallpaper_img}" ]]; then
-    convert "$wallpaper" -resize "${width}x" -gravity center -crop "${width}x${height}+0+0" +repage \( \
+  if [ -n "$wallpaper" ] && [ -n "$wallpaper_img" ]; then
+    magick "$wallpaper" -resize "${width}x" -gravity center -crop "${width}x${height}+0+0" +repage \( \
           -size 120x140 xc:none \
           \) -gravity south -compose over -composite "${wallpaper_img}"
   fi
@@ -152,11 +152,11 @@ cropbg () {
 blurbg () {
   echo "Blurring background ..."
 
-  if [[ -f "${wallpaper_img}" ]] && [[ -n "${wallpaper_blur_img}" ]]; then
-    convert "${wallpaper_img}" \
+  if [ -f "$wallpaper_img" ] && [ -n "$wallpaper_blur_img" ]; then
+    magick "$wallpaper_img" \
       -filter Gaussian \
       -blur 0x8 \
-      "${wallpaper_blur_img}"
+      "$wallpaper_blur_img"
   fi
 }
 
@@ -164,8 +164,8 @@ blurbg () {
 genbg () {
   echo "Caching background ..."
 
-  if [[ ! -d "${HOME}/.cache/n3lock" ]]; then
-    mkdir "${HOME}/.cache/n3lock"
+  if [ ! -d "$HOME/.cache/n3lock" ]; then
+    mkdir "$HOME/.cache/n3lock"
   fi
 
   if [ ! -f "$1" ] && [ -d "$wallpath" ]; then
